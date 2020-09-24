@@ -15,6 +15,10 @@ node {
            
         
     }
+    stage('deploy on tomcat')
+    {
+        deploy adapters: [tomcat8(credentialsId: 'tomcatadmin', path: '', url: 'http://localhost:8090/')], contextPath: 'webapp01', war: '**/*.war'
+    }
     stage('docker image build') {
            sh 'docker --version'
         sh 'docker build -t gautamjainsagar/mywebappimage .'

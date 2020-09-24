@@ -17,18 +17,18 @@ node {
     }
     stage('deploy on tomcat')
     {
-        deploy adapters: [tomcat8(credentialsId: 'tomcatadmin', path: '', url: 'http://localhost:8090/')], contextPath: 'webapp01', war: '**/*.war'
+        deploy adapters: [tomcat8(credentialsId: 'tomcatadmin', path: '', url: 'http://localhost:8090/')], contextPath: 'webapp', war: '**/*.war'
     }
     stage('docker image build') {
            sh 'docker --version'
-        sh 'docker build -t gautamjainsagar/mywebappimage .'
+        sh 'docker build -t gautamjainsagar/myjavawebappimage .'
         
     }
     stage('docker image push & run') {
     withCredentials([string(credentialsId: 'DockerHubPass', variable: 'dockerHubPass')]) {
         sh 'docker login -u gautamjainsagar -p ${dockerHubPass}'
-        sh 'docker push gautamjainsagar/mywebappimage'
-        //sh 'docker run -d -p 8088:8080 gautamjainsagar/mywebappimage'
+        sh 'docker push gautamjainsagar/myjavawebappimage'
+        //sh 'docker run -d -p 8088:8080 gautamjainsagar/myjavawebappimage'
     // some block
     }
 }

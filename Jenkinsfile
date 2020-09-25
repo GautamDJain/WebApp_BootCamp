@@ -1,35 +1,33 @@
 node {
-    def mvnHome
-    stage('Preparation') { // for display purposes
-        // Get some code from a GitHub repository
-       git credentialsId: 'github', url: 'https://github.com/GautamDJain/WebApp_BootCamp.git'
-        // Get the Maven tool.
-        // ** NOTE: This 'M3' Maven tool must be configured
-        // **       in the global configuration.
-     
+    def MvnHome=tool name: 'maven-3', type: 'maven'
+	def MavenCMD="${MvnHome}/bin/mvn"
+	def docker=tool name: 'docker', type: 'dockerTool'
+	def DockerCMD="${docker}/bin/docker"
+    stage('GitHub Repo checkout & Preparation') { 
+       git credentialsId: 'GitHub', url: 'https://github.com/GautamDJain/WebApp_BootCamp.git'  
     }
-    stage('Build') {
-        // Run the maven build
-                mvnHome = tool 'maven-3'
-                sh 'mvn clean package'
-           
-        
+    stage('Maven Build, Unit test & Package') {
+                sh "${MavenCMD} clean package"       
     }
-    stage('deploy on tomcat')
+	 stage('deploy on tomcat')
     {
-        deploy adapters: [tomcat8(credentialsId: 'tomcatadmin', path: '', url: 'http://localhost:8090/')], contextPath: 'webapp', war: '**/*.war'
+        //deploy adapters: [tomcat8(credentialsId: 'tomcatadmin', path: '', url: 'http://localhost:8090/')], contextPath: 'webapp', war: '**/*.war'
     }
-    stage('docker image build') {
-           sh 'docker --version'
-        sh 'docker build -t gautamjainsagar/myjavawebappimage .'
-        
+    stage('Docker image build & push to Docker Hub') {
+        sh "${DockerCMD} --version"
+        sh "${DockerCMD} build -t gautamjainsagar/myjavawebappimage  ."
+        withCredentials([string(credentialsId: 'DockerHubPass', variable: 'dockerHubPass')]) {
+           sh "${DockerCMD} login -u gautamjainsagar -p ${dockerHubPass}"     
+        }
+	    sh "${DockerCMD} push gautamjainsagar/myjavawebappimage "
     }
-    stage('docker image push & run') {
-    withCredentials([string(credentialsId: 'DockerHubPass', variable: 'dockerHubPass')]) {
-        sh 'docker login -u gautamjainsagar -p ${dockerHubPass}'
-        sh 'docker push gautamjainsagar/myjavawebappimage'
-        //sh 'docker run -d -p 8088:8080 gautamjainsagar/myjavawebappimage'
-    // some block
+    stage('Docker image pull & run') {
+	sshagent(['Docker_User_SSH']) {
+        sh 'ssh -o StrictHostKeyChecking=no cloud_user@10.128.0.4 docker --version'
+		sh 'ssh -o StrictHostKeyChecking=no cloud_user@10.128.0.4 docker stop javawebapp || true'
+		sh 'ssh -o StrictHostKeyChecking=no cloud_user@10.128.0.4 docker rm -f javawebapp || true'
+		sh 'ssh -o StrictHostKeyChecking=no cloud_user@10.128.0.4 docker run -d -p 8081:8080 --name javawebapp gautamjainsagar/myjavawebappimage '
+        //sh 'docker run -d -p 8088:8080 gautamjainsagar/myjavawebappimage '
     }
 }
 }

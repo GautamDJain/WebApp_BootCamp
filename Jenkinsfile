@@ -40,8 +40,12 @@ node {
             }
         }
         stage('Docker image pull & run container') {
+	   def stopCMD = 'sudo docker stop javawebapp || true'
+           def removeCMD = 'sudo docker rm -f javawebapp || true'
            def runCMD = 'sudo docker run -d -p 8082:8080 --name javawebapp gautamjainsagar/myjavawebappimage '
            sshagent(['Docker_AWSUser_SSH']) {
+	      sh "ssh -o StrictHostKeyChecking=no ec2-user@${prodIp} ${stopCMD}"
+	      sh "ssh -o StrictHostKeyChecking=no ec2-user@${prodIp} ${removeCMD}"
               sh "ssh -o StrictHostKeyChecking=no ec2-user@${prodIp} ${runCMD}"
             }
         }

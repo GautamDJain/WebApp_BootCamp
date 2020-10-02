@@ -27,7 +27,7 @@ node {
         def prodIp = "NULL"
         stage('Get Prod server IP address'){
             def command = 'aws ec2 describe-instances --filters "Name=tag-value,Values=Production" --query "Reservations[*].Instances[*].PublicIpAddress[]" --output text'
-            prodIp = sh "(script: ${command}).trim() , returnStdout:true"
+            prodIp = sh (script: "${command}", returnStdout:true).trim()
             println prodIp
         }
         stage('Install & Run Docker on AWS new instance'){

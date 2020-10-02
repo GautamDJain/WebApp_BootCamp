@@ -33,7 +33,7 @@ node {
         stage('Install & Run Docker on AWS new instance'){
             def installCMD = 'sudo yum install docker -y'
 		    def startCMD = 'sudo service docker start'
-            sshagent(['Docker_User_SSH']) {
+            sshagent(['Docker_AWSUser_SSH']) {
               sh "ssh -o StrictHostKeyChecking=no ec2-user@${prodIp} ${installCMD}"
 			  sh "ssh -o StrictHostKeyChecking=no ec2-user@${prodIp} sleep 5"
 		      sh "ssh -o StrictHostKeyChecking=no ec2-user@${prodIp} ${startCMD}"
@@ -41,7 +41,7 @@ node {
         }
         stage('Docker image pull & run container') {
            def runCMD = 'sudo docker run -d -p 8082:8080 --name javawebapp gautamjainsagar/myjavawebappimage '
-           sshagent(['Docker_User_SSH']) {
+           sshagent(['Docker_AWSUser_SSH']) {
               sh "ssh -o StrictHostKeyChecking=no ec2-user@${prodIp} ${runCMD}"
             }
         }

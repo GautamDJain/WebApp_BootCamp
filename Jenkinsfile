@@ -24,15 +24,26 @@ node {
             }
 	        sh "${DockerCMD} push gautamjainsagar/myjavawebappimage"
         }
-        stage('Docker image pull & run') {
-	        sshagent(['Docker_AWSUser_SSH']) {
-                sh 'ssh -o StrictHostKeyChecking=no ec2-user@172.31.17.204 sudo docker --version'
-			    sh "ssh -o StrictHostKeyChecking=no ec2-user@172.31.17.204 sudo service docker start"
-		        sh 'ssh -o StrictHostKeyChecking=no ec2-user@172.31.17.204 sudo docker stop javawebapp || true'
-		        sh 'ssh -o StrictHostKeyChecking=no ec2-user@172.31.17.204 sudo docker rm -f javawebapp || true'
-		        sh 'ssh -o StrictHostKeyChecking=no ec2-user@172.31.17.204 sudo docker run -d -p 8082:8080 --name javawebapp gautamjainsagar/myjavawebappimage'
-                      //sh 'docker run -d -p 8088:8080 gautamjainsagar/myjavawebappimage'
-           }
+        def prodIp = "NULL"
+        stage('Get Prod server IP address'){
+            def command = 'aws ec2 describe-instances --filters "Name=tag-value,Values=Production" --query "Reservations[*].Instances[*].PublicIpAddress[]" --output text'
+            prodIp = sh script: "${command}" , returnStdout:true
+            println prodIp
+        }
+        stage('Install & Run Docker on AWS new instance'){
+            def installCMD = 'sudo yum install docker -y'
+		    def startCMD = 'sudo service docker start'
+            sshagent(['Docker_User_SSH']) {
+              sh "ssh -o StrictHostKeyChecking=no ec2-user@${prodIp} ${installCMD}"
+			  sh "ssh -o StrictHostKeyChecking=no ec2-user@${prodIp} sleep 5"
+		      sh "ssh -o StrictHostKeyChecking=no ec2-user@${prodIp} ${startCMD}"
+            }
+        }
+        stage('Docker image pull & run container') {
+           def runCMD = 'sudo docker run -d -p 8082:8080 --name javawebapp gautamjainsagar/myjavawebappimage '
+           sshagent(['Docker_User_SSH']) {
+              sh "ssh -o StrictHostKeyChecking=no ec2-user@${prodIp} ${runCMD}"
+            }
         }
     }
     catch(e){

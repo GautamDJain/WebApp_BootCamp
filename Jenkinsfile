@@ -30,7 +30,7 @@ node {
 			    sh "ssh -o StrictHostKeyChecking=no ec2-user@172.31.17.204 sudo service docker start"
 		        sh 'ssh -o StrictHostKeyChecking=no ec2-user@172.31.17.204 sudo docker stop javawebapp || true'
 		        sh 'ssh -o StrictHostKeyChecking=no ec2-user@172.31.17.204 sudo docker rm -f javawebapp || true'
-		        sh 'ssh -o StrictHostKeyChecking=no ec2-user@172.31.17.204 sudo docker run -d -p 8088:8080 --name javawebapp gautamjainsagar/myjavawebappimage'
+		        sh 'ssh -o StrictHostKeyChecking=no ec2-user@172.31.17.204 sudo docker run -d -p 8082:8080 --name javawebapp gautamjainsagar/myjavawebappimage'
                       //sh 'docker run -d -p 8088:8080 gautamjainsagar/myjavawebappimage'
            }
         }

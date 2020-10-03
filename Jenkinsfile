@@ -28,12 +28,15 @@ node {
         ansiblePlaybook becomeUser: 'ec2-user', credentialsId: 'Docker_AWSUser_SSH', installation: 'ansible', playbook: 'Create-ec2-playbook.yml', sudoUser: 'ec2-user'
     }
         def prodIp = "NULL"
+		def instanceId = "NULL"
         stage('Get Prod server IP address'){
-		def a = 'aws ec2 describe-instances --filters "Name=tag-value,Values=Production" --query "Reservations[*].Instances[*]"'
-		sh "${a}"
-            def command = 'aws ec2 describe-instances --filters "Name=tag-value,Values=Production" --query "Reservations[*].Instances[*].PublicIpAddress[]" --output text'
-            prodIp = sh (script: "${command}", returnStdout:true).trim()
+		def instanceFilter = 'aws ec2 describe-instances --filters "Name=tag-value,Values=Production" --query "Reservations[*].Instances[*].InstanceId[]" --output text'
+            def ipFilter = 'aws ec2 describe-instances --filters "Name=tag-value,Values=Production" --query "Reservations[*].Instances[*].PublicIpAddress[]" --output text'
+            instanceId = sh (script: "${instanceFilter}", returnStdout:true).trim()
+            println instanceId
+	    prodIp = sh (script: "${ipFilter}", returnStdout:true).trim()
             println prodIp
+		
         }
         stage('Install & Run Docker on AWS new instance'){
             def installCMD = 'sudo yum install docker -y'

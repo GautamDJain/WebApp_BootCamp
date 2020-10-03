@@ -7,10 +7,11 @@
      instance_type : t2.micro
      key_name : devops_bootcamp
      image : ami-097834fcb3081f51a
+     instance_tags :
+      Name : gautam
      region : us-east-2
      group : launch-wizard-1
      count : 1
      vpc_subnet_id : subnet-a3e8e1d9
      wait : yes
      assign_public_ip : yes
-     tags : gautam

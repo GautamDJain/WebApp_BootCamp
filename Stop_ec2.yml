@@ -11,7 +11,7 @@
           "tag:Name": gautam
       register: ec2_facts
 
-     - name: Terminate EC2 server
+    - name: Terminate EC2 server
       ec2:
         region: us-east-2
         instance_ids: "{{ item }}"

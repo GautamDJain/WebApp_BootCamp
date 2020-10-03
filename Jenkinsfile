@@ -29,6 +29,8 @@ node {
     }
         def prodIp = "NULL"
         stage('Get Prod server IP address'){
+		def a = aws ec2 describe-instances --filters "Name=tag-value,Values=Production" --query "Reservations[*].Instances[*]"
+		sh "${a}"
             def command = 'aws ec2 describe-instances --filters "Name=tag-value,Values=Production" --query "Reservations[*].Instances[*].PublicIpAddress[]" --output text'
             prodIp = sh (script: "${command}", returnStdout:true).trim()
             println prodIp

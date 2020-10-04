@@ -25,12 +25,12 @@ node {
 	        sh "${DockerCMD} push gautamjainsagar/myjavawebappimage"
         }
 	stage('Launch new EC2 instance with ansible'){
-        ansiblePlaybook becomeUser: 'ec2-user', credentialsId: 'Docker_AWSUser_SSH', installation: 'ansible', playbook: 'Create-ec2-playbook.yml', sudoUser: 'ec2-user'
+        //ansiblePlaybook becomeUser: 'ec2-user', credentialsId: 'Docker_AWSUser_SSH', installation: 'ansible', playbook: 'Create-ec2-playbook.yml', sudoUser: 'ec2-user'
     }
         def prodIp = "NULL"
 		def instanceId = "NULL"
         stage('Get Prod server IP address'){
-		def instanceFilter = 'aws ec2 describe-instances --filters "Name=tag-value,Values=Production" --query "Reservations[*].Instances[*].InstanceId[]" --output text'
+	    def instanceFilter = 'aws ec2 describe-instances --filters "Name=tag-value,Values=Production" --query "Reservations[*].Instances[*].InstanceId[]" --output text'
             def ipFilter = 'aws ec2 describe-instances --filters "Name=tag-value,Values=Production" --query "Reservations[*].Instances[*].PublicIpAddress[]" --output text'
             instanceId = sh (script: "${instanceFilter}", returnStdout:true).trim()
             println instanceId

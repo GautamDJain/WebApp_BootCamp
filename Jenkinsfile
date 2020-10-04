@@ -25,7 +25,7 @@ node {
 	        sh "${DockerCMD} push gautamjainsagar/myjavawebappimage"
         }
 	stage('Launch new EC2 instance with ansible'){
-        //ansiblePlaybook becomeUser: 'ec2-user', credentialsId: 'Docker_AWSUser_SSH', installation: 'ansible', playbook: 'Create-ec2-playbook.yml', sudoUser: 'ec2-user'
+        ansiblePlaybook becomeUser: 'ec2-user', credentialsId: 'Docker_AWSUser_SSH', installation: 'ansible', playbook: 'Create-ec2-playbook.yml', sudoUser: 'ec2-user'
     }
         def prodIp = "NULL"
 		def instanceId = "NULL"
